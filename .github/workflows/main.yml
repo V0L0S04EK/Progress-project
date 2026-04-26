@@ -19,4 +19,4 @@ jobs:
       #- run: npm ci
       #- run: npm run build
       # Deploy
-      - run: cd app && rsync -e "ssh -p 20022 -i $HOME/.ssh/key -o StrictHostKeyChecking=no" --archive --compress --delete . /var/www/u3492312/data/www/xn--c1aezdfcia.fun
+      - run: rsync -e "ssh -p 20022 -i $HOME/.ssh/key -o StrictHostKeyChecking=no" --archive --compress --delete . /var/www/u3492312/data/www/xn--c1aezdfcia.fun
