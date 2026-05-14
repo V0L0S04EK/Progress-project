@@ -1,0 +1,29 @@
+name: Deploy to ISPManager via FTP
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '24'
+    - run: npm ci
+    - run: npm run docs:build
+
+    - name: 📂 Deploy to ISPManager via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.ISP_HOST }}
+        username: ${{ secrets.ISP_LOGIN }}
+        password: ${{ secrets.ISP_PASSWORD }}
+        port: ${{ secrets.FTP_PORT }}
+        local-dir: ./.vitepress/dist/
+        server-dir: ./www/xn--c1aezdfcia.fun/  
