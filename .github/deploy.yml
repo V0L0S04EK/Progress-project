@@ -1,22 +1,29 @@
-name: Deploy
+name: Deploy to ISPManager via FTP
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      # Setup key
-      - run: set -eu
-      - run: mkdir "$HOME/.ssh"
-      - run: echo "$" > "$HOME/.ssh/key"
-      - run: chmod 600 "$HOME/.ssh/key"
-      # Build
-      #- run: npm ci
-      #- run: npm run build
-      # Deploy
-      - run: cd app && rsync -e "ssh -p 20022 -i $HOME/.ssh/key -o StrictHostKeyChecking=no" --archive --compress --delete . /www/xn--c1aezdfcia.fun
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - run: npm ci
+    - run: npm run build # Сборка проекта в папку (например, build/)
+
+    - name: 📂 Deploy to ISPManager via FTP
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        port: ${{ secrets.FTP_PORT }}
+        local-dir: ./.vitepress/dist # Укажите папку, которую нужно загрузить (из шага сборки)
+        server-dir: ./www/xn--c1aezdfcia.fun/  # Путь до корня сайта на сервере ISPManager
