@@ -25,5 +25,5 @@ jobs:
         username: ${{ secrets.ISP_LOGIN }}
         password: ${{ secrets.ISP_PASSWORD }}
         port: ${{ secrets.FTP_PORT }}
-        local-dir: ./.vitepress/dist 
+        local-dir: ./.vitepress/dist/
         server-dir: ./www/xn--c1aezdfcia.fun/  
