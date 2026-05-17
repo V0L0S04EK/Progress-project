@@ -44,7 +44,7 @@
 <script setup>
 import { ref, nextTick } from 'vue'
 
-const API_URL = 'https://backend-progress.onrender.com/'
+const API_URL = 'https://backend-progress.onrender.com'
 
 const isOpen = ref(false)
 const isLoading = ref(false)
