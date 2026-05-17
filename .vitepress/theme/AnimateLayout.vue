@@ -2,6 +2,7 @@
 import DefaultTheme from 'vitepress/theme'
 import { useData } from 'vitepress'
 import { onMounted, ref } from 'vue'
+import RagChat from './components/RagChat.vue'
 
 const { Layout } = DefaultTheme
 const { frontmatter } = useData()
@@ -72,6 +73,10 @@ onMounted(() => {
       <div class="breadcrumb-custom">
         Цифровая стройка / {{ frontmatter.title || 'Документация' }}
       </div>
+    </template>
+
+    <template #layout-bottom>
+      <RagChat />
     </template>
   </Layout>
 </template>
