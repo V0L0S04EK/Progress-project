@@ -44,17 +44,22 @@ export default defineConfig({
                     { text: 'Часть 2: Площадка и контроль', link: '/data/ai-construction-part2' }
                 ]
             },
-
-            { text: 'Архитектор и дизайнер', link: '/data/ai-construction-part3' },
-            { text: 'Инженер-проектировщик (BIM-менеджер)', link: '/data/ai-construction-part4' },
-            { text: 'Руководитель проекта', link: '/data/ai-construction-part5' },
-            { text: 'Инженер-сметчик / Специалист ПТО', link: '/data/ai-construction-part6' },
-            { text: 'Инженер по охране труда и технике безопасности (ОТ и ТБ)', link: '/data/ai-construction-part7' },
-            { text: 'Специалист по закупкам и логистике (Снабженец)', link: '/data/ai-construction-part8' },
-            { text: 'Геодезист / Оператор строительных дронов', link: '/data/ai-construction-part9' },
-            { text: 'Прораб / Начальник участка', link: '/data/ai-construction-part10' },
-            { text: 'Инженер по качеству (Технадзор / Строительный контроль)', link: '/data/ai-construction-part11' },
-            { text: 'Специалист по работе с клиентами / Риелтор новостроек', link: '/data/ai-construction-part12' },
+            {
+                text: 'Профессии',
+                collapsed: false, 
+                items: [
+                    { text: 'Архитектор и дизайнер', link: '/data/ai-construction-part3' },
+                    { text: 'Инженер-проектировщик (BIM-менеджер)', link: '/data/ai-construction-part4' },
+                    { text: 'Руководитель проекта', link: '/data/ai-construction-part5' },
+                    { text: 'Инженер-сметчик / Специалист ПТО', link: '/data/ai-construction-part6' },
+                    { text: 'Инженер по охране труда и технике безопасности (ОТ и ТБ)', link: '/data/ai-construction-part7' },
+                    { text: 'Специалист по закупкам и логистике (Снабженец)', link: '/data/ai-construction-part8' },
+                    { text: 'Геодезист / Оператор строительных дронов', link: '/data/ai-construction-part9' },
+                    { text: 'Прораб / Начальник участка', link: '/data/ai-construction-part10' },
+                    { text: 'Инженер по качеству (Технадзор / Строительный контроль)', link: '/data/ai-construction-part11' },
+                    { text: 'Специалист по работе с клиентами / Риелтор новостроек', link: '/data/ai-construction-part12' }
+                ]
+            }
         ],
 
         socialLinks: [
