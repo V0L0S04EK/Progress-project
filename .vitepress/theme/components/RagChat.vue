@@ -20,7 +20,7 @@
             <div class="sources-title">📚 Источники:</div>
             <ol class="sources-list">
               <li v-for="(link, lIdx) in getValidLinks(msg)" :key="lIdx">
-                <a :href="link.url" @click.prevent="navigate(link.url)" class="source-link">
+                <a :href="link.url" class="source-link">
                   {{ link.title }}
                 </a>
               </li>
@@ -51,12 +51,10 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
-// Импортируем роутер из VitePress для мгновенных переходов
-import { useRouter } from 'vitepress'
+// Добавили onMounted и watch для работы с памятью браузера
+import { ref, nextTick, onMounted, watch } from 'vue'
 
 const API_URL = 'https://backend-progress-production.up.railway.app'
-const router = useRouter()
 
 const isOpen = ref(false)
 const isLoading = ref(false)
@@ -69,25 +67,33 @@ const messages = ref([
 ])
 const messagesContainer = ref(null)
 
-// Функция для мгновенного перехода без перезагрузки страницы
-const navigate = (url) => {
-  if (!url || url === '#') return
-  
-  // Если ссылка полная внешняя (с https://), но ведет на наш же домен
-  if (url.startsWith('http')) {
-    try {
-      const parsedUrl = new URL(url)
-      // Переходим по относительному пути (например, /data/ai-construction-part1)
-      router.go(parsedUrl.pathname.replace('.html', ''))
-    } catch (e) {
-      // На всякий случай, если ссылка внешняя чужая — откроем обычно
-      window.location.href = url
-    }
-  } else {
-    // Если ссылка уже относительная (например, /data/ai-construction-part1)
-    router.go(url.replace('.html', ''))
+// --- МАГИЯ СОХРАНЕНИЯ СОСТОЯНИЯ ---
+// При загрузке страницы проверяем, есть ли сохраненная история в sessionStorage
+onMounted(() => {
+  const savedMessages = sessionStorage.getItem('ai_chat_history')
+  if (savedMessages) {
+    messages.value = JSON.parse(savedMessages)
   }
-}
+  
+  const savedState = sessionStorage.getItem('ai_chat_is_open')
+  if (savedState) {
+    isOpen.value = savedState === 'true'
+    if (isOpen.value) {
+      scrollToBottom()
+    }
+  }
+})
+
+// Если сообщения изменились, сразу сохраняем их в память браузера
+watch(messages, (newVal) => {
+  sessionStorage.setItem('ai_chat_history', JSON.stringify(newVal))
+}, { deep: true })
+
+// Запоминаем, открыт чат или закрыт
+watch(isOpen, (newVal) => {
+  sessionStorage.setItem('ai_chat_is_open', String(newVal))
+})
+// ---------------------------------
 
 const toggleChat = () => {
   isOpen.value = !isOpen.value
@@ -103,7 +109,6 @@ const scrollToBottom = async () => {
   }
 }
 
-// Карта названий для строительных статей
 const articleTitles = {
   'ai-construction-part1': 'Часть 1: Проектирование',
   'ai-construction-part2': 'Часть 2: Площадка и контроль',
@@ -143,10 +148,7 @@ const getValidLinks = (msg) => {
     msg.source_urls.forEach(url => {
       if (typeof url === 'string' && url.trim() !== '' && !seenUrls.has(url)) {
         seenUrls.add(url)
-        links.push({
-          url: url, 
-          title: generateCleanTitle(url)
-        })
+        links.push({ url: url, title: generateCleanTitle(url) })
       }
     })
   }
@@ -162,7 +164,7 @@ const getValidLinks = (msg) => {
         } else {
           const partMatch = src.match(/part\d+/)
           const targetPart = partMatch ? partMatch[0] : 'part1'
-          const cleanUrl = `/data/ai-construction-${targetPart}`
+          const cleanUrl = `/data/ai-construction-${targetPart}.html`
           
           if (!seenUrls.has(cleanUrl)) {
             seenUrls.add(cleanUrl)
@@ -221,6 +223,7 @@ const sendMessage = async () => {
 </script>
 
 <style scoped>
+/* Стили остались полностью без изменений */
 .rag-chat-widget {
   position: fixed;
   bottom: 25px;
