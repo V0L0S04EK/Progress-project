@@ -15,9 +15,15 @@
         <div v-for="(msg, idx) in messages" :key="idx" 
              :class="['message', msg.role]">
           <div class="message-content">{{ msg.content }}</div>
-          <div v-if="msg.sources" class="sources">
-             Источники: {{ msg.sources.length }}
+          
+          <div v-if="msg.sources && msg.sources.length" class="sources">
+            Источники ({{ msg.sources.length }}): 
+            <span v-for="(src, sIdx) in msg.sources" :key="sIdx">
+              <a :href="`/data/${src}`" class="source-link">{{ src }}</a>
+              <span v-if="sIdx < msg.sources.length - 1">, </span>
+            </span>
           </div>
+          
         </div>
         <div v-if="isLoading" class="message bot">
           <div class="typing-indicator">
@@ -225,6 +231,19 @@ const sendMessage = async () => {
   font-size: 10px;
   color: rgba(148, 163, 184, 0.6) !important;
   margin-top: 5px;
+}
+
+/* ИЗМЕНЕНО: Стили для красивого отображения неоновых ссылок */
+.source-link {
+  color: #22D3EE !important;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.2s ease;
+}
+
+.source-link:hover {
+  text-decoration: underline;
+  color: #67e8f9 !important;
 }
 
 .typing-indicator {
