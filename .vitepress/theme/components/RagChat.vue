@@ -20,7 +20,7 @@
             <div class="sources-title">📚 Источники:</div>
             <ol class="sources-list">
               <li v-for="(link, lIdx) in getValidLinks(msg)" :key="lIdx">
-                <a :href="link.url" class="source-link" target="_self">
+                <a :href="link.url" @click.prevent="navigate(link.url)" class="source-link">
                   {{ link.title }}
                 </a>
               </li>
@@ -52,8 +52,11 @@
 
 <script setup>
 import { ref, nextTick } from 'vue'
+// Импортируем роутер из VitePress для мгновенных переходов
+import { useRouter } from 'vitepress'
 
 const API_URL = 'https://backend-progress-production.up.railway.app'
+const router = useRouter()
 
 const isOpen = ref(false)
 const isLoading = ref(false)
@@ -65,6 +68,26 @@ const messages = ref([
   }
 ])
 const messagesContainer = ref(null)
+
+// Функция для мгновенного перехода без перезагрузки страницы
+const navigate = (url) => {
+  if (!url || url === '#') return
+  
+  // Если ссылка полная внешняя (с https://), но ведет на наш же домен
+  if (url.startsWith('http')) {
+    try {
+      const parsedUrl = new URL(url)
+      // Переходим по относительному пути (например, /data/ai-construction-part1)
+      router.go(parsedUrl.pathname.replace('.html', ''))
+    } catch (e) {
+      // На всякий случай, если ссылка внешняя чужая — откроем обычно
+      window.location.href = url
+    }
+  } else {
+    // Если ссылка уже относительная (например, /data/ai-construction-part1)
+    router.go(url.replace('.html', ''))
+  }
+}
 
 const toggleChat = () => {
   isOpen.value = !isOpen.value
@@ -96,34 +119,26 @@ const articleTitles = {
   'ai-construction-part12': 'Специалист по работе с клиентами / Риелтор'
 }
 
-// "Всеядная" функция парсинга ссылок
 const getValidLinks = (msg) => {
   const links = []
   const seenUrls = new Set()
 
-  // Функция для генерации понятного человеческого имени из любого слага/кракозябры
   const generateCleanTitle = (url) => {
     try {
       const slug = url.split('/').pop().replace('.html', '')
-      
       if (articleTitles[slug]) return articleTitles[slug]
-      
       if (slug.includes('ai-construction-part')) {
         const partNum = slug.split('-part')[1]
         return `Строительство: Часть ${partNum}`
       }
-      
-      // Если это битая кодировка — пытаемся вытащить номер части, если он там есть
       const partMatch = slug.match(/part(\d+)/i)
       if (partMatch) return `Материал: Часть ${partMatch[1]}`
-      
       return 'Документ из базы знаний'
     } catch (e) {
       return 'Полезный материал'
     }
   }
 
-  // 1. Проверяем массив ссылок source_urls
   if (msg.source_urls && Array.isArray(msg.source_urls)) {
     msg.source_urls.forEach(url => {
       if (typeof url === 'string' && url.trim() !== '' && !seenUrls.has(url)) {
@@ -136,7 +151,6 @@ const getValidLinks = (msg) => {
     })
   }
 
-  // 2. Если пустой source_urls, но есть sources (аварийный режим)
   if (links.length === 0 && msg.sources && Array.isArray(msg.sources)) {
     msg.sources.forEach(src => {
       if (typeof src === 'string' && src.trim() !== '') {
@@ -146,10 +160,9 @@ const getValidLinks = (msg) => {
             links.push({ url: src, title: generateCleanTitle(src) })
           }
         } else {
-          // Вытаскиваем номер части из кракозябры регуляркой
           const partMatch = src.match(/part\d+/)
           const targetPart = partMatch ? partMatch[0] : 'part1'
-          const cleanUrl = `/data/ai-construction-${targetPart}.html`
+          const cleanUrl = `/data/ai-construction-${targetPart}`
           
           if (!seenUrls.has(cleanUrl)) {
             seenUrls.add(cleanUrl)
