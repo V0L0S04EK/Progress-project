@@ -16,12 +16,15 @@
              :class="['message', msg.role]">
           <div class="message-content">{{ msg.content }}</div>
           
-          <div v-if="msg.sources && msg.sources.length" class="sources">
-            Источники ({{ msg.sources.length }}): 
-            <span v-for="(src, sIdx) in msg.sources" :key="sIdx">
-              <a :href="`/data/${src}`" class="source-link">{{ src }}</a>
-              <span v-if="sIdx < msg.sources.length - 1">, </span>
-            </span>
+          <div v-if="msg.sources && msg.sources.length" class="sources-block">
+            <div class="sources-title">📚 Источники:</div>
+            <ol class="sources-list">
+              <li v-for="(src, sIdx) in msg.sources" :key="sIdx">
+                <a :href="`/data/${src}`" class="source-link">
+                  {{ formatSourceTitle(src) }}
+                </a>
+              </li>
+            </ol>
           </div>
           
         </div>
@@ -77,6 +80,24 @@ const scrollToBottom = async () => {
   }
 }
 
+const formatSourceTitle = (slug) => {
+  const titles = {
+    'ai-construction-part1': 'Часть 1: Проектирование',
+    'ai-construction-part2': 'Часть 2: Площадка и контроль',
+    'ai-construction-part3': 'Архитектор и дизайнер',
+    'ai-construction-part4': 'Инженер-проектировщик',
+    'ai-construction-part5': 'Руководитель проекта',
+    'ai-construction-part6': 'Инженер-сметчик / Специалист ПТО',
+    'ai-construction-part7': 'Инженер по охране труда и ТБ',
+    'ai-construction-part8': 'Специалист по закупкам и логистике',
+    'ai-construction-part9': 'Геодезист / Operator дронов',
+    'ai-construction-part10': 'Прораб / Начальник участка',
+    'ai-construction-part11': 'Инженер по качеству (Технадзор)',
+    'ai-construction-part12': 'Специалист по работе с клиентами / Риелтор'
+  }
+  return titles[slug] || slug
+}
+
 const sendMessage = async () => {
   if (!currentQuestion.value.trim() || isLoading.value) return
   
@@ -96,7 +117,10 @@ const sendMessage = async () => {
     
     if (!response.ok) throw new Error('Ошибка сервера')
     
-    const data = await response.json()
+    // Получаем сырой текст, чтобы гарантировать правильную кодировку UTF-8
+    const responseText = await response.text()
+    const data = JSON.parse(responseText)
+    
     messages.value.push({ 
       role: 'bot', 
       content: data.answer,
@@ -116,7 +140,6 @@ const sendMessage = async () => {
 </script>
 
 <style scoped>
-
 .rag-chat-widget {
   position: fixed;
   bottom: 25px;
@@ -227,23 +250,38 @@ const sendMessage = async () => {
   border-bottom-left-radius: 4px;
 }
 
-.sources {
-  font-size: 10px;
-  color: rgba(148, 163, 184, 0.6) !important;
-  margin-top: 5px;
+.sources-block {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* ИЗМЕНЕНО: Стили для красивого отображения неоновых ссылок */
+.sources-title {
+  font-size: 12px;
+  font-weight: 700;
+  color: #E2E8F0 !important;
+  margin-bottom: 4px;
+}
+
+.sources-list {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 12px;
+  color: #94A3B8 !important;
+}
+
+.sources-list li {
+  margin-bottom: 4px;
+}
+
 .source-link {
-  color: #22D3EE !important;
-  text-decoration: none;
-  font-weight: 600;
+  color: #38BDF8 !important;
+  text-decoration: underline;
   transition: color 0.2s ease;
 }
 
 .source-link:hover {
-  text-decoration: underline;
-  color: #67e8f9 !important;
+  color: #7DD3FC !important;
 }
 
 .typing-indicator {
