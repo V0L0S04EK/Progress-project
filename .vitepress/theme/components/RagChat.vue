@@ -7,7 +7,7 @@
     
     <div v-if="isOpen" class="chat-window">
       <div class="chat-header">
-        <h3> AI Помощник</h3>
+        <h3>AI Помощник</h3>
         <p class="subtitle">Поможет вам сориентироваться в базе</p>
       </div>
       
@@ -16,12 +16,12 @@
              :class="['message', msg.role]">
           <div class="message-content">{{ msg.content }}</div>
           
-          <div v-if="msg.source_urls && msg.source_urls.length" class="sources-block">
+          <div v-if="getValidLinks(msg).length" class="sources-block">
             <div class="sources-title">📚 Источники:</div>
             <ol class="sources-list">
-              <li v-for="(url, uIdx) in msg.source_urls" :key="uIdx">
-                <a :href="url" class="source-link" target="_self">
-                  {{ formatTitleFromUrl(url) }}
+              <li v-for="(link, lIdx) in getValidLinks(msg)" :key="lIdx">
+                <a :href="link.url" class="source-link" target="_self">
+                  {{ link.title }}
                 </a>
               </li>
             </ol>
@@ -61,7 +61,7 @@ const currentQuestion = ref('')
 const messages = ref([
   { 
     role: 'bot', 
-    content: 'Привет! Я AI-ассистент этой базы данных о нейросетях в строительстве. Готов ответить на твои вопросы!'
+    content: 'Привет! Я AI-ассистент этой базы данных. Готов ответить на твои вопросы!'
   }
 ])
 const messagesContainer = ref(null)
@@ -80,29 +80,90 @@ const scrollToBottom = async () => {
   }
 }
 
-// Новый хелпер: вытаскивает из URL имя файла и подставляет красивое название
-const formatTitleFromUrl = (url) => {
-  if (typeof url !== 'string') return 'Инженерная статья';
-  
-  // Вытаскиваем хвостик ссылки (например, ai-construction-part6 из https://.../ai-construction-part6.html)
-  const slug = url.split('/').pop().replace('.html', '');
+// Карта названий для строительных статей
+const articleTitles = {
+  'ai-construction-part1': 'Часть 1: Проектирование',
+  'ai-construction-part2': 'Часть 2: Площадка и контроль',
+  'ai-construction-part3': 'Архитектор и дизайнер',
+  'ai-construction-part4': 'Инженер-проектировщик',
+  'ai-construction-part5': 'Руководитель проекта',
+  'ai-construction-part6': 'Инженер-сметчик / Специалист ПТО',
+  'ai-construction-part7': 'Инженер по охране труда и ТБ',
+  'ai-construction-part8': 'Специалист по закупкам и логистике',
+  'ai-construction-part9': 'Геодезист / Оператор дронов',
+  'ai-construction-part10': 'Прораб / Начальник участка',
+  'ai-construction-part11': 'Инженер по качеству (Технадзор)',
+  'ai-construction-part12': 'Специалист по работе с клиентами / Риелтор'
+}
 
-  const titles = {
-    'ai-construction-part1': 'Часть 1: Проектирование',
-    'ai-construction-part2': 'Часть 2: Площадка и контроль',
-    'ai-construction-part3': 'Архитектор и дизайнер',
-    'ai-construction-part4': 'Инженер-проектировщик',
-    'ai-construction-part5': 'Руководитель проекта',
-    'ai-construction-part6': 'Инженер-сметчик / Специалист ПТО',
-    'ai-construction-part7': 'Инженер по охране труда и ТБ',
-    'ai-construction-part8': 'Специалист по закупкам и логистике',
-    'ai-construction-part9': 'Геодезист / Оператор дронов',
-    'ai-construction-part10': 'Прораб / Начальник участка',
-    'ai-construction-part11': 'Инженер по качеству (Технадзор)',
-    'ai-construction-part12': 'Специалист по работе с клиентами / Риелтор'
+// "Всеядная" функция парсинга ссылок
+const getValidLinks = (msg) => {
+  const links = []
+  const seenUrls = new Set()
+
+  // Функция для генерации понятного человеческого имени из любого слага/кракозябры
+  const generateCleanTitle = (url) => {
+    try {
+      const slug = url.split('/').pop().replace('.html', '')
+      
+      if (articleTitles[slug]) return articleTitles[slug]
+      
+      if (slug.includes('ai-construction-part')) {
+        const partNum = slug.split('-part')[1]
+        return `Строительство: Часть ${partNum}`
+      }
+      
+      // Если это битая кодировка — пытаемся вытащить номер части, если он там есть
+      const partMatch = slug.match(/part(\d+)/i)
+      if (partMatch) return `Материал: Часть ${partMatch[1]}`
+      
+      return 'Документ из базы знаний'
+    } catch (e) {
+      return 'Полезный материал'
+    }
   }
-  
-  return titles[slug] || 'Полезный материал из базы данных';
+
+  // 1. Проверяем массив ссылок source_urls
+  if (msg.source_urls && Array.isArray(msg.source_urls)) {
+    msg.source_urls.forEach(url => {
+      if (typeof url === 'string' && url.trim() !== '' && !seenUrls.has(url)) {
+        seenUrls.add(url)
+        links.push({
+          url: url, 
+          title: generateCleanTitle(url)
+        })
+      }
+    })
+  }
+
+  // 2. Если пустой source_urls, но есть sources (аварийный режим)
+  if (links.length === 0 && msg.sources && Array.isArray(msg.sources)) {
+    msg.sources.forEach(src => {
+      if (typeof src === 'string' && src.trim() !== '') {
+        if (src.startsWith('http')) {
+          if (!seenUrls.has(src)) {
+            seenUrls.add(src)
+            links.push({ url: src, title: generateCleanTitle(src) })
+          }
+        } else {
+          // Вытаскиваем номер части из кракозябры регуляркой
+          const partMatch = src.match(/part\d+/)
+          const targetPart = partMatch ? partMatch[0] : 'part1'
+          const cleanUrl = `/data/ai-construction-${targetPart}.html`
+          
+          if (!seenUrls.has(cleanUrl)) {
+            seenUrls.add(cleanUrl)
+            links.push({ 
+              url: cleanUrl, 
+              title: articleTitles[`ai-construction-${targetPart}`] || `Часть ${targetPart.replace('part', '')}`
+            })
+          }
+        }
+      }
+    })
+  }
+
+  return links
 }
 
 const sendMessage = async () => {
@@ -127,10 +188,10 @@ const sendMessage = async () => {
     const responseText = await response.text()
     const data = JSON.parse(responseText)
     
-    // ТЕПЕРЬ ТУТ: сохраняем в сообщение именно массив source_urls
     messages.value.push({ 
       role: 'bot', 
       content: data.answer,
+      sources: data.sources,
       source_urls: data.source_urls 
     })
   } catch (error) {
