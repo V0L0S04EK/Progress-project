@@ -95,7 +95,6 @@ onMounted(() => {
   --vp-nav-bg-color: #050810 !important;
 }
 
-/* --- НАВИГАЦИЯ (БЕЗ ИЗМЕНЕНИЙ) --- */
 .VPNav {
   background-color: #050810 !important;
 }
@@ -120,13 +119,11 @@ onMounted(() => {
   font-size: 11px !important;
   text-transform: uppercase;
   letter-spacing: 1.5px;
-  /* ТВОЙ ФИКС ОТСТУПОВ (НЕ ТРОГАЮ) */
   padding-top: 0 !important; 
   margin-top: 0 !important;
   padding-bottom: 8px !important;
 }
 
-/* Ссылки с анимацией Hover */
 .VPSidebarItem .link {
   color: #CBD5E1 !important;
   padding: 8px 24px !important;
@@ -148,7 +145,6 @@ onMounted(() => {
   box-shadow: inset 4px 0 10px -4px rgba(34, 211, 238, 0.3);
 }
 
-/* --- ГЛАВНАЯ СТРАНИЦА (НЕ ТРОГАЮ) --- */
 .VPHome {
   background: radial-gradient(circle at 50% -10%, #111827 0%, #050810 70%) !important;
 }
