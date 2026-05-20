@@ -16,12 +16,12 @@
              :class="['message', msg.role]">
           <div class="message-content">{{ msg.content }}</div>
           
-          <div v-if="msg.sources && msg.sources.length" class="sources-block">
+          <div v-if="msg.source_urls && msg.source_urls.length" class="sources-block">
             <div class="sources-title">📚 Источники:</div>
             <ol class="sources-list">
-              <li v-for="(src, sIdx) in msg.sources" :key="sIdx">
-                <a :href="getSourceLink(src)" class="source-link" target="_self">
-                  {{ formatSourceTitle(src) }}
+              <li v-for="(url, uIdx) in msg.source_urls" :key="uIdx">
+                <a :href="url" class="source-link" target="_self">
+                  {{ formatTitleFromUrl(url) }}
                 </a>
               </li>
             </ol>
@@ -80,11 +80,14 @@ const scrollToBottom = async () => {
   }
 }
 
-const formatSourceTitle = (slug) => {
-  if (typeof slug !== 'string') return 'Инженерная статья';
+// Новый хелпер: вытаскивает из URL имя файла и подставляет красивое название
+const formatTitleFromUrl = (url) => {
+  if (typeof url !== 'string') return 'Инженерная статья';
+  
+  // Вытаскиваем хвостик ссылки (например, ai-construction-part6 из https://.../ai-construction-part6.html)
+  const slug = url.split('/').pop().replace('.html', '');
 
-  // Базовый маппинг для нормальных строк
-  const exactTitles = {
+  const titles = {
     'ai-construction-part1': 'Часть 1: Проектирование',
     'ai-construction-part2': 'Часть 2: Площадка и контроль',
     'ai-construction-part3': 'Архитектор и дизайнер',
@@ -98,40 +101,8 @@ const formatSourceTitle = (slug) => {
     'ai-construction-part11': 'Инженер по качеству (Технадзор)',
     'ai-construction-part12': 'Специалист по работе с клиентами / Риелтор'
   }
-  if (exactTitles[slug]) return exactTitles[slug];
-
-  // Аварийное декодирование и сопоставление по кускам кракозябр в UTF-8/CP1251
-  const lower = slug.toLowerCase();
-  if (lower.includes('part1') || lower.includes('æññòå¼¾ñ')) return exactTitles['ai-construction-part1'];
-  if (lower.includes('part2')) return exactTitles['ai-construction-part2'];
-  if (lower.includes('part3') || lower.includes('ð°ñð¹ñðµºñð¾ñ')) return exactTitles['ai-construction-part3'];
-  if (lower.includes('part4') || lower.includes('ð¸ð½ð¶ðµð½ðµñ-ññð¾ðµºñð¸ñð¾ð²ñð¸ðº')) return exactTitles['ai-construction-part4'];
-  if (lower.includes('part5') || lower.includes('ññðºð¾ð²ð¾ð´ð¸ñðµð»ñ')) return exactTitles['ai-construction-part5'];
-  if (lower.includes('part6') || lower.includes('ñð¼ðµññð¸ðº')) return exactTitles['ai-construction-part6'];
-  if (lower.includes('part7') || lower.includes('ð¾ññð°ð½ðµ')) return exactTitles['ai-construction-part7'];
-  if (lower.includes('part8') || lower.includes('ð·ð°ðºñð¿ðºð°ð¼')) return exactTitles['ai-construction-part8'];
-  if (lower.includes('part9') || lower.includes('ð³ðµð¾ð´ðµð·ð¸ññ')) return exactTitles['ai-construction-part9'];
-  if (lower.includes('part10') || lower.includes('ññð¾ñð°ð±') || lower.includes('ð½ð°ñð°ð»ñð½ð¸ðº')) return exactTitles['ai-construction-part10'];
-  if (lower.includes('part11') || lower.includes('ñðµñð½ð°ð´ð·ð¾ñ')) return exactTitles['ai-construction-part11'];
-  if (lower.includes('part12') || lower.includes('ñð¸ðµð»ñð¾ñ')) return exactTitles['ai-construction-part12'];
-
-  return 'Полезный материал из базы данных';
-}
-
-const getSourceLink = (slug) => {
-  if (typeof slug !== 'string') return '/';
   
-  // Ищем номер части или специфичные символы в строке
-  for (let i = 1; i <= 12; i++) {
-    if (slug.toLowerCase().includes(`part${i}`)) {
-      return `/data/ai-construction-part${i}`;
-    }
-  }
-  
-  // Если бэкенд прислал сплошную кашу из символов, маппим их по хэш-сумме, чтобы ссылка вела на одну из 12 статей
-  const hash = slug.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-  const fallbackPart = (hash % 12) + 1;
-  return `/data/ai-construction-part${fallbackPart}`;
+  return titles[slug] || 'Полезный материал из базы данных';
 }
 
 const sendMessage = async () => {
@@ -153,14 +124,14 @@ const sendMessage = async () => {
     
     if (!response.ok) throw new Error('Ошибка сервера')
     
-    // Получаем сырой текст, гарантируя считывание в UTF-8
     const responseText = await response.text()
     const data = JSON.parse(responseText)
     
+    // ТЕПЕРЬ ТУТ: сохраняем в сообщение именно массив source_urls
     messages.value.push({ 
       role: 'bot', 
       content: data.answer,
-      sources: data.sources 
+      source_urls: data.source_urls 
     })
   } catch (error) {
     console.error('Ошибка:', error)
