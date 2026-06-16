@@ -57,7 +57,17 @@ export default defineConfig({
                     { text: 'Геодезист / Оператор строительных дронов', link: '/data/ai-construction-part9' },
                     { text: 'Прораб / Начальник участка', link: '/data/ai-construction-part10' },
                     { text: 'Инженер по качеству (Технадзор / Строительный контроль)', link: '/data/ai-construction-part11' },
-                    { text: 'Специалист по работе с клиентами / Риелтор новостроек', link: '/data/ai-construction-part12' }
+                    { text: 'Специалист по работе с клиентами / Риелтор новостроек', link: '/data/ai-construction-part12' },
+                    { text: 'Юрист в сфере строительства и девелопмента', link: '/data/ai-construction-part13' },
+                    { text: 'Маркетолог строительной компании / ЖК', link: '/data/ai-construction-part14' },
+                    { text: 'Инженер ОВК (Отопление, вентиляция и кондиционирование)', link: '/data/ai-construction-part15' },
+                    { text: 'Инженер ЭОМ (Электроснабжение, освещение, силовое оборудование)', link: '/data/ai-construction-part16' },
+                    { text: 'Специалист по проектированию «Умных домов» и систем автоматизации (IoT)', link: '/data/ai-construction-part17' },
+                    { text: 'HR-менеджер строительного холдинга', link: '/data/ai-construction-part18' },
+                    { text: 'Эколог / Аудитор «зеленых» стандартов строительства', link: '/data/ai-construction-part19' },
+                    { text: 'Инженер-демонтажник (Специалист по сносу и редевелопменту)', link: '/data/ai-construction-part20' },
+                    { text: 'Инженер-конструктор (Расчетчик несущих строительных конструкций)', link: '/data/ai-construction-part21' },
+                    { text: 'Директор по развитию / Фаундер строительной компании', link: '/data/ai-construction-part22' }
                 ]
             }
         ],
