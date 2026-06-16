@@ -54,7 +54,7 @@
 // Добавили onMounted и watch для работы с памятью браузера
 import { ref, nextTick, onMounted, watch } from 'vue'
 
-const API_URL = 'https://backend-progress-production.up.railway.app'
+const API_URL = 'https:/backend-progress-production-6ccd.up.railway.app'
 
 const isOpen = ref(false)
 const isLoading = ref(false)
@@ -67,8 +67,6 @@ const messages = ref([
 ])
 const messagesContainer = ref(null)
 
-// --- МАГИЯ СОХРАНЕНИЯ СОСТОЯНИЯ ---
-// При загрузке страницы проверяем, есть ли сохраненная история в sessionStorage
 onMounted(() => {
   const savedMessages = sessionStorage.getItem('ai_chat_history')
   if (savedMessages) {
@@ -84,16 +82,13 @@ onMounted(() => {
   }
 })
 
-// Если сообщения изменились, сразу сохраняем их в память браузера
 watch(messages, (newVal) => {
   sessionStorage.setItem('ai_chat_history', JSON.stringify(newVal))
 }, { deep: true })
 
-// Запоминаем, открыт чат или закрыт
 watch(isOpen, (newVal) => {
   sessionStorage.setItem('ai_chat_is_open', String(newVal))
 })
-// ---------------------------------
 
 const toggleChat = () => {
   isOpen.value = !isOpen.value
@@ -223,7 +218,6 @@ const sendMessage = async () => {
 </script>
 
 <style scoped>
-/* Стили остались полностью без изменений */
 .rag-chat-widget {
   position: fixed;
   bottom: 25px;
