@@ -190,4 +190,13 @@ onMounted(() => {
   letter-spacing: 1.5px;
   margin-bottom: 24px;
 }
+
+.VPNavBarAppearance {
+  display: none !important;
+}
+
+.VPSwitchAppearance {
+  display: none !important;
+}
+
 </style>

@@ -4,6 +4,7 @@ export default defineConfig({
     lang: 'ru-RU',
     title: "Цифровая Стройка",
     description: "База знаний о нейросетях в строительстве",
+    appearance: 'dark',
     themeConfig: {
         docFooter: {
             prev: 'Предыдущая страница',
