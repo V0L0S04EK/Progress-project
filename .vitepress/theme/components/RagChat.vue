@@ -54,7 +54,7 @@
 
 import { ref, nextTick, onMounted, watch } from 'vue'
 
-const API_URL = 'https://backend-progress-production-6ccd.up.railway.app/'
+const API_URL = 'https://backend-progress-production-6ccd.up.railway.app'
 
 const isOpen = ref(false)
 const isLoading = ref(false)
